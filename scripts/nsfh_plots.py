@@ -15,9 +15,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-TABLES_XLSX = Path("NSFH_stacked_tables.xlsx")
-ANALYTIC_XLSX = Path("NSFH_stacked_analytic_replication_ready.xlsx")
-OUTDIR = Path("figures")
+SCRIPT_DIR = Path(__file__).parent.resolve()
+PROJECT_ROOT = SCRIPT_DIR.parent
+TABLES_XLSX = PROJECT_ROOT / "Data" / "NSFH_WavesStacked" / "NSFH_stacked_tables.xlsx"
+ANALYTIC_XLSX = PROJECT_ROOT / "Data" / "NSFH_WavesStacked" / "NSFH_stacked_analytic_replication_ready.xlsx"
+OUTDIR = PROJECT_ROOT / "figures"
 OUTDIR.mkdir(exist_ok=True)
 
 def cohort_sort_key(s):
