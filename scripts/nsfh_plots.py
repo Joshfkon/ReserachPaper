@@ -9,11 +9,93 @@
 #  - P(remarried 2+ | partnered)
 #
 # Designed for GitHub inclusion (no notebook state, deterministic outputs)
+# Style: FT-inspired with clean, journal-appropriate colors
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from pathlib import Path
+
+# =============================================================================
+# FT-STYLE CONFIGURATION (Journal-appropriate colors)
+# =============================================================================
+
+# Color palette - muted, professional, colorblind-friendly
+COLORS = {
+    'male': '#2A6185',       # Deep teal-blue
+    'female': '#D4654A',     # Muted coral/terracotta
+    'single': '#3D5A6C',     # Slate blue-gray for single-series plots
+    'reference': '#9EAEB8',  # Light gray for reference lines
+    'grid': '#E8E8E8',       # Very light gray for gridlines
+    'text': '#333333',       # Dark gray for text (not pure black)
+    'spine': '#CCCCCC',      # Light gray for axis spines
+}
+
+# Figure styling
+FIG_WIDTH = 7
+FIG_HEIGHT = 4.5
+DPI = 300
+
+def setup_ft_style():
+    """Configure matplotlib for FT-inspired journal style."""
+    plt.rcParams.update({
+        # Figure
+        'figure.figsize': (FIG_WIDTH, FIG_HEIGHT),
+        'figure.facecolor': 'white',
+        'figure.dpi': 100,
+        'savefig.dpi': DPI,
+        'savefig.facecolor': 'white',
+        'savefig.bbox': 'tight',
+        'savefig.pad_inches': 0.15,
+
+        # Font - clean sans-serif
+        'font.family': 'sans-serif',
+        'font.sans-serif': ['Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans'],
+        'font.size': 10,
+
+        # Axes
+        'axes.facecolor': 'white',
+        'axes.edgecolor': COLORS['spine'],
+        'axes.linewidth': 0.8,
+        'axes.grid': True,
+        'axes.axisbelow': True,
+        'axes.titlesize': 12,
+        'axes.titleweight': 'medium',
+        'axes.titlepad': 12,
+        'axes.labelsize': 10,
+        'axes.labelcolor': COLORS['text'],
+        'axes.labelpad': 8,
+        'axes.spines.top': False,
+        'axes.spines.right': False,
+
+        # Grid
+        'grid.color': COLORS['grid'],
+        'grid.linewidth': 0.6,
+        'grid.alpha': 1.0,
+
+        # Ticks
+        'xtick.color': COLORS['text'],
+        'ytick.color': COLORS['text'],
+        'xtick.labelsize': 9,
+        'ytick.labelsize': 9,
+        'xtick.major.width': 0.8,
+        'ytick.major.width': 0.8,
+        'xtick.major.size': 4,
+        'ytick.major.size': 4,
+
+        # Legend
+        'legend.frameon': False,
+        'legend.fontsize': 9,
+        'legend.loc': 'best',
+
+        # Lines
+        'lines.linewidth': 2.0,
+        'lines.markersize': 6,
+    })
+
+# Apply style on import
+setup_ft_style()
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -43,24 +125,28 @@ def plot_ever_partnered_by_wave():
         cohorts = sorted(d["cohort_primary"].dropna().unique(), key=cohort_sort_key)
         d["cohort_primary"] = pd.Categorical(d["cohort_primary"], categories=cohorts, ordered=True)
 
-        plt.figure(figsize=(8,5))
+        fig, ax = plt.subplots()
+        sex_colors = {'Male': COLORS['male'], 'Female': COLORS['female']}
+
         for sex in ["Male", "Female"]:
             s = d[d["sex_label"] == sex].sort_values("cohort_primary")
             p = s["p_ever_partnered"]
             n = s["N_age_le_35"]
             lo, hi = add_ci(p, n)
+            color = sex_colors[sex]
 
-            plt.plot(s["cohort_primary"], p, marker="o", label=sex)
-            plt.errorbar(s["cohort_primary"], p, yerr=[p-lo, hi-p], fmt="none", capsize=3)
+            ax.plot(s["cohort_primary"], p, marker="o", label=sex, color=color)
+            ax.errorbar(s["cohort_primary"], p, yerr=[p-lo, hi-p],
+                        fmt="none", capsize=3, color=color, alpha=0.7)
 
-        plt.title(f"Ever partnered by age ≤35 — {wave}")
-        plt.ylabel("Probability")
-        plt.xlabel("Birth cohort")
-        plt.ylim(0,1)
+        ax.set_title(f"Ever partnered by age ≤35 — {wave}")
+        ax.set_ylabel("Probability")
+        ax.set_xlabel("Birth cohort")
+        ax.set_ylim(0, 1)
         plt.xticks(rotation=45, ha="right")
-        plt.legend()
+        ax.legend()
         plt.tight_layout()
-        plt.savefig(OUTDIR / f"ever_partnered_{wave}.png", dpi=300)
+        plt.savefig(OUTDIR / f"ever_partnered_{wave}.png")
         plt.close()
 
 def plot_gap_by_wave():
@@ -88,54 +174,57 @@ def plot_gap_by_wave():
         d["cohort_primary"] = pd.Categorical(d["cohort_primary"], categories=cohorts, ordered=True)
         d = d.sort_values("cohort_primary")
 
-        plt.figure(figsize=(8,5))
-        plt.plot(d["cohort_primary"], d["gap"], marker="o")
-        plt.errorbar(d["cohort_primary"], d["gap"],
-                     yerr=[d["gap"]-d["lo"], d["hi"]-d["gap"]],
-                     fmt="none", capsize=3)
-        plt.axhline(0, linewidth=1)
-        plt.title(f"Female − Male gap in ever partnered — {wave}")
-        plt.ylabel("Gap")
-        plt.xlabel("Birth cohort")
+        fig, ax = plt.subplots()
+        ax.plot(d["cohort_primary"], d["gap"], marker="o", color=COLORS['single'])
+        ax.errorbar(d["cohort_primary"], d["gap"],
+                    yerr=[d["gap"]-d["lo"], d["hi"]-d["gap"]],
+                    fmt="none", capsize=3, color=COLORS['single'], alpha=0.7)
+        ax.axhline(0, linewidth=1, color=COLORS['reference'], linestyle='--')
+        ax.set_title(f"Female − Male gap in ever partnered — {wave}")
+        ax.set_ylabel("Gap")
+        ax.set_xlabel("Birth cohort")
         plt.xticks(rotation=45, ha="right")
         plt.tight_layout()
-        plt.savefig(OUTDIR / f"gap_ever_partnered_{wave}.png", dpi=300)
+        plt.savefig(OUTDIR / f"gap_ever_partnered_{wave}.png")
         plt.close()
 
 def plot_marriages_and_remarriage():
     df = pd.read_excel(TABLES_XLSX, sheet_name="stacked_primary_all_by_wave")
+    sex_colors = {'Male': COLORS['male'], 'Female': COLORS['female']}
 
     for wave, d in df.groupby("wave"):
         cohorts = sorted(d["cohort_primary"].dropna().unique(), key=cohort_sort_key)
         d["cohort_primary"] = pd.Categorical(d["cohort_primary"], categories=cohorts, ordered=True)
 
         # Mean marriages
-        plt.figure(figsize=(8,5))
-        for sex in ["Male","Female"]:
+        fig, ax = plt.subplots()
+        for sex in ["Male", "Female"]:
             s = d[d["sex_label"]==sex].sort_values("cohort_primary")
-            plt.plot(s["cohort_primary"], s["mean_marriages_if_partnered"], marker="o", label=sex)
-        plt.title(f"Mean marriages | ever partnered — {wave}")
-        plt.ylabel("Mean marriages")
-        plt.xlabel("Birth cohort")
+            ax.plot(s["cohort_primary"], s["mean_marriages_if_partnered"],
+                    marker="o", label=sex, color=sex_colors[sex])
+        ax.set_title(f"Mean marriages | ever partnered — {wave}")
+        ax.set_ylabel("Mean marriages")
+        ax.set_xlabel("Birth cohort")
         plt.xticks(rotation=45, ha="right")
-        plt.legend()
+        ax.legend()
         plt.tight_layout()
-        plt.savefig(OUTDIR / f"mean_marriages_{wave}.png", dpi=300)
+        plt.savefig(OUTDIR / f"mean_marriages_{wave}.png")
         plt.close()
 
         # Remarriage probability
-        plt.figure(figsize=(8,5))
-        for sex in ["Male","Female"]:
+        fig, ax = plt.subplots()
+        for sex in ["Male", "Female"]:
             s = d[d["sex_label"]==sex].sort_values("cohort_primary")
-            plt.plot(s["cohort_primary"], s["p_remarried_2plus_if_partnered"], marker="o", label=sex)
-        plt.title(f"P(remarried 2+ | partnered) — {wave}")
-        plt.ylabel("Probability")
-        plt.xlabel("Birth cohort")
-        plt.ylim(0,1)
+            ax.plot(s["cohort_primary"], s["p_remarried_2plus_if_partnered"],
+                    marker="o", label=sex, color=sex_colors[sex])
+        ax.set_title(f"P(remarried 2+ | partnered) — {wave}")
+        ax.set_ylabel("Probability")
+        ax.set_xlabel("Birth cohort")
+        ax.set_ylim(0, 1)
         plt.xticks(rotation=45, ha="right")
-        plt.legend()
+        ax.legend()
         plt.tight_layout()
-        plt.savefig(OUTDIR / f"p_remarried2plus_{wave}.png", dpi=300)
+        plt.savefig(OUTDIR / f"p_remarried2plus_{wave}.png")
         plt.close()
 
 if __name__ == "__main__":
