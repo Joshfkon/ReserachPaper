@@ -142,15 +142,33 @@ Key metrics:
 
 ---
 
-### 8.2 Census / CPS (Post-2000)
-Goal:
-- Track never-married rates by sex and age
-- Establish post-app continuation on the extensive margin
+### 8.2 Census / CPS / ACS / SIPP (Post-2000)
 
-Strengths:
-- Large samples
-- Stable definitions
-- Reviewer-proof
+**Goal:** Distinguish (i) current unpartnered sex gaps from (ii) lifetime partnering gaps, and quantify the degree to which cohabitation offsets (or amplifies) marriage-only gaps.
+
+**Primary estimands:**
+
+- **Currently partnered** = married + cohabiting (point-in-time) by sex × age band × year (CPS/ACS-style household relationship measures).
+- **Ever married** by cohort × age (SIPP marital history).
+- **Never partnered** = never married AND never cohabited (NSFG; lifetime analogue closest to NSFH extensive margin).
+
+**Deliverables:**
+
+- **"Cohabitation offset" table:** Gap(married) vs Gap(partnered) by age band and year.
+- **Cohort tracking:** Show whether large sex gaps at 25–29 compress by 30–34 and 35–39, or persist for app-era cohorts.
+
+**Measurement note:** These sources do not use identical lifetime "ever cohabited" constructs, so results will be framed as complementary estimands rather than a single harmonized series. Importantly, CPS/ACS "currently cohabiting" understates lifetime cohabitation—individuals who cohabited but subsequently separated appear as unpartnered. This implies the true lifetime partnership gap is likely larger than point-in-time CPS estimates suggest.
+
+#### Appendix Figure A: Cohabitation Offset
+
+For each age band (25–29, 30–34, 35–39), plot:
+
+1. Sex gap in married-only (% married, male minus female)
+2. Sex gap in partnered (% married + cohabiting, male minus female)
+3. Implied offset (difference between lines 1 and 2)
+4. Sex gap in never partnered (NSFG: never married AND never cohabited, male minus female)
+
+Line 4 provides the only true lifetime measure for comparison. A footnote should clarify that NSFG "never partnered" captures cumulative partnership exposure, whereas CPS/ACS lines reflect point-in-time status and therefore understate the lifetime gap.
 
 ---
 
